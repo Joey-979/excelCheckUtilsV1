@@ -31,6 +31,7 @@ public class ExcelComparer {
         filePath1 = filePath1 + file1Name;
         filePath2 = filePath2 + file2Name;
 
+        String pre = map.get("pre");
         String key = map.get("k");
         Integer kI = Integer.valueOf(key);
         kI -= 1;
@@ -49,30 +50,33 @@ public class ExcelComparer {
 //        }
 
         String logName = "对比" + file1Name + "和" + file2Name;
-        FileWriter.writeFile(currentDirectory, logName, resultMessage);
+        MyFileWriter.writeFile(currentDirectory, logName, resultMessage, pre);
     }
 
     // 读取 Excel 文件并返回 Map
-    public static Map<String, Record> readExcel(String filePath, Integer l, Integer kI, String tableName) throws IOException {
+    public static Map<String, Record> readExcel(String filePath, Integer l, Integer kI, String tableName) {
 
         Map<String, Record> recordMap = new HashMap<>();
-        FileInputStream fis = new FileInputStream(new File(filePath));
-        XSSFWorkbook workbook = new XSSFWorkbook(fis);
-        XSSFSheet sheet = workbook.getSheetAt(0);
+//        FileInputStream fis = new FileInputStream(new File(filePath));
+        try (FileInputStream fis = new FileInputStream(filePath)) {
 
-        for (Row row : sheet) {
-            HashMap<Integer, String> excelKVMap = new HashMap<>();
-            for (Integer i = 0; i < l; i++) {
+            XSSFWorkbook workbook = new XSSFWorkbook(fis);
+            XSSFSheet sheet = workbook.getSheetAt(0);
 
-//            }
-                String stringCellValue = getStringCellValue(row, i);
-                excelKVMap.put(i, stringCellValue);
+            for (Row row : sheet) {
+                HashMap<Integer, String> excelKVMap = new HashMap<>();
+                for (Integer i = 0; i < l; i++) {
+
+                    String stringCellValue = getStringCellValue(row, i);
+                    excelKVMap.put(i, stringCellValue);
+                }
+                String recordKeyValue = excelKVMap.get(kI);
+
+                recordMap.put(recordKeyValue, new Record(excelKVMap, tableName));
             }
-            String recordKeyValue = excelKVMap.get(kI);
-
-            recordMap.put(recordKeyValue, new Record(excelKVMap, tableName));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        fis.close();
         return recordMap;
     }
 

@@ -51,6 +51,9 @@ public class XmlReader {
         String length = getTagValue(rootElement, "length");
         result.put("l", length);
 
+        String outFilePre = getTagValue(rootElement, "outFilePre");
+        result.put("pre", outFilePre);
+
         return result;
 
     }
